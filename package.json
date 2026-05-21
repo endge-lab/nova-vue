@@ -1,0 +1,44 @@
+{
+  "name": "@endge/nova-vue",
+  "private": false,
+  "version": "0.2.0",
+  "type": "module",
+  "module": "./dist/nova-vue.js",
+  "types": "./dist/index.d.ts",
+  "web-types": "./web-types.json",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/nova-vue.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "web-types.json"
+  ],
+  "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "dev": "vite build --watch",
+    "dev:watch": "vite build --watch",
+    "build": "vite build",
+    "test": "vitest run --config vite.config.ts"
+  },
+  "dependencies": {
+    "@endge/nova": "^0.6.0",
+    "@endge/nova-devtools": "^0.1.0",
+    "@endge/utils": "^0.23.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "jsdom": "^26.1.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.7.3",
+    "vite": "^6.1.0",
+    "vite-plugin-dts": "^4.5.0",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^2.2.0"
+  }
+}
