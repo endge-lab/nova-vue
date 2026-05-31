@@ -1,11 +1,14 @@
 {
   "name": "@endge/nova-vue",
   "private": false,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "module": "./dist/nova-vue.js",
   "types": "./dist/index.d.ts",
   "web-types": "./web-types.json",
+  "nova": {
+    "components": "./nova-components.json"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,19 +18,21 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "web-types.json"
+    "web-types.json",
+    "nova-components.json"
   ],
   "scripts": {
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "dev": "vite build --watch",
     "dev:watch": "vite build --watch",
     "build": "vite build",
+    "pretest": "pnpm --filter @endge/nova build && pnpm --filter @endge/nova-devtools build:runtime",
     "test": "vitest run --config vite.config.ts"
   },
   "dependencies": {
-    "@endge/nova": "^0.6.0",
-    "@endge/nova-devtools": "^0.1.0",
-    "@endge/utils": "^0.23.0",
+    "@endge/nova": "workspace:*",
+    "@endge/nova-devtools": "workspace:*",
+    "@endge/utils": "workspace:*",
     "vue": "^3.5.13"
   },
   "devDependencies": {

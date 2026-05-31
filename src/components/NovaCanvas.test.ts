@@ -295,6 +295,39 @@ describe('NovaCanvas', () => {
     app.unmount()
   })
 
+  it('patches NovaCanvas props bridge without recreating the mounted root', async () => {
+    const host = document.createElement('div')
+    const theme = ref('light')
+    const app = createApp({
+      setup: () => () => h(NovaCanvas, {
+        width: 320,
+        height: 240,
+        props: { theme: theme.value },
+        devtools: false,
+      }, {
+        nova: () => h('nova-template', {
+          component: TestCompiledNode,
+        }),
+      }),
+    })
+
+    document.body.appendChild(host)
+    app.mount(host)
+    await nextTick()
+
+    const instance = TestCompiledNode.instances[0]
+    expect(instance.props.theme).toBe('light')
+
+    theme.value = 'dark'
+    await nextTick()
+
+    expect(TestCompiledNode.instances).toHaveLength(1)
+    expect(TestCompiledNode.instances[0]).toBe(instance)
+    expect(instance.props.theme).toBe('dark')
+
+    app.unmount()
+  })
+
   it('updates listeners through the existing mount handle', async () => {
     const host = document.createElement('div')
     const listener = ref(vi.fn())
@@ -544,6 +577,9 @@ function installCanvasMocks(): void {
   })
 
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation((type: string) => {
+    if (type === RendererType.WebGL || type === 'webgl2' || type === 'webgl') {
+      return createWebGLContextStub()
+    }
     if (type !== RendererType.Web2D) return null
     return new Proxy({
       measureText: vi.fn((text: string) => ({ width: text.length * 8 })),
@@ -567,6 +603,37 @@ function installCanvasMocks(): void {
       },
     }) as CanvasRenderingContext2D
   })
+}
+
+function createWebGLContextStub(): WebGL2RenderingContext {
+  return new Proxy({
+    canvas: document.createElement('canvas'),
+    createBuffer: vi.fn(() => ({})),
+    createProgram: vi.fn(() => ({})),
+    createShader: vi.fn(() => ({})),
+    createTexture: vi.fn(() => ({})),
+    createVertexArray: vi.fn(() => ({})),
+    getAttribLocation: vi.fn(() => 0),
+    getExtension: vi.fn(() => null),
+    getParameter: vi.fn(() => 4096),
+    getProgramInfoLog: vi.fn(() => ''),
+    getProgramParameter: vi.fn(() => true),
+    getShaderInfoLog: vi.fn(() => ''),
+    getShaderParameter: vi.fn(() => true),
+    getUniformLocation: vi.fn(() => ({})),
+  }, {
+    /**
+     * Возвращает значение состояния текущего класса.
+     */
+    get(target, property) {
+      if (!(property in target)) {
+        ;(target as Record<PropertyKey, unknown>)[property] = typeof property === 'string' && /^[A-Z0-9_]+$/.test(property)
+          ? 0
+          : vi.fn()
+      }
+      return (target as Record<PropertyKey, unknown>)[property]
+    },
+  }) as WebGL2RenderingContext
 }
 
 function installResizeObserverMock(): void {

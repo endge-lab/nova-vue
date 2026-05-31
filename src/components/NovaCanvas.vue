@@ -29,7 +29,7 @@ import {
   type PropType,
   type VNode,
 } from 'vue'
-import { Nova, type NovaApp, type NovaMountHandle, type NovaSchemaPlugin, type NovaScope, type NovaSurface, type NovaSyncScope } from '@endge/nova'
+import { Nova, RendererType, type NovaApp, type NovaMountHandle, type NovaSchemaPlugin, type NovaScope, type NovaSurface, type NovaSyncScope } from '@endge/nova'
 import type { NovaCanvasDevtoolsOption, NovaCanvasReadyPayload, NovaTemplateBinding } from '@/types'
 
 const props = withDefaults(
@@ -41,6 +41,7 @@ const props = withDefaults(
     surfaceName?: string
     plugins?: Array<NovaSchemaPlugin>
     appOptions?: Record<string, any>
+    mount?: string
     padding?: unknown
     background?: string
     border?: unknown
@@ -48,6 +49,7 @@ const props = withDefaults(
     rootId?: string
     rootClassName?: string
     styleSheet?: unknown
+    props?: Record<string, unknown>
     devtools?: NovaCanvasDevtoolsOption
     syncScope?: NovaSyncScope
   }>(),
@@ -56,7 +58,7 @@ const props = withDefaults(
     maxDpr: 2,
     surfaceName: 'nova-canvas',
     plugins: () => [],
-    appOptions: () => ({}),
+    appOptions: () => ({ renderer: { main: RendererType.WebGL } }),
     devtools: undefined,
   },
 )
@@ -151,6 +153,7 @@ watch(
     props.rootId,
     props.rootClassName,
     props.styleSheet,
+    props.props,
     props.width,
     props.height,
   ],
@@ -236,6 +239,7 @@ function resizeRuntime(): void {
 
 function resolveTemplateProps(size: { width: number; height: number }): Record<string, unknown> {
   return {
+    ...(props.props ?? {}),
     ...(templateBinding?.props ?? {}),
     width: size.width,
     height: size.height,
@@ -338,7 +342,7 @@ function readNovaTemplateBinding(nodes: Array<VNode>): NovaTemplateBinding | nul
     if (key === 'component' || key === 'source' || key === 'debug-id' || key === 'debugId') continue
     if (key === 'novaRefs' || key === 'nova-refs') continue
     if (key.startsWith('on') && key.length > 2 && typeof value === 'function') {
-      const eventName = `${key.charAt(2).toLowerCase()}${key.slice(3)}`
+      const eventName = `${key[2].toLowerCase()}${key.slice(3)}`
       listeners[eventName] = value as (...args: Array<any>) => void
       continue
     }

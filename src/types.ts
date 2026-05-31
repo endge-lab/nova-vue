@@ -50,6 +50,8 @@ export interface NovaCanvasProps extends NovaCanvasRootProps {
   surfaceName?: string
   plugins?: Array<NovaSchemaPlugin>
   appOptions?: Partial<Omit<NovaAppCreateOptions, 'target' | 'size'>>
+  mount?: string
+  props?: Record<string, unknown>
   devtools?: NovaCanvasDevtoolsOption
   syncScope?: NovaSyncScope
 }
